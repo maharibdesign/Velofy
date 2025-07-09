@@ -1,0 +1,18 @@
+---
+interface Props { question: string; }
+const { question } = Astro.props;
+---
+<div class="py-5 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+    <details class="group">
+        <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
+            <span class="text-lg">{question}</span>
+            <span class="transition group-open:rotate-180">
+                <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+        </summary>
+        <div class="text-gray-600 dark:text-gray-300 mt-4 group-open:animate-fadeIn">
+            <slot />
+        </div>
+    </details>
+</div>
+<style> @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } </style>

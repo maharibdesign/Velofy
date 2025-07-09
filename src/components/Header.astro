@@ -1,0 +1,41 @@
+---
+import DarkModeToggle from './DarkModeToggle.astro';
+
+const navLinks = [
+    { href: "/work", text: "Work" },
+    { href: "/pricing", text: "Pricing" },
+    { href: "/faq", text: "FAQ" },
+];
+---
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-2">
+             <img src="/logo-light.svg" alt="Velofy Logo" class="h-8 w-auto block dark:hidden">
+             <img src="/logo-dark.svg" alt="Velofy Logo" class="h-8 w-auto hidden dark:block">
+        </a>
+        <nav class="hidden md:flex items-center space-x-8">
+            {navLinks.map(link => (
+                <a href={link.href} class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">{link.text}</a>
+            ))}
+        </nav>
+        <div class="flex items-center space-x-4">
+            <DarkModeToggle />
+            <a href="/admin" id="admin-button" class="btn-secondary hidden rounded-lg px-3 py-2 text-sm font-semibold">
+                Admin
+            </a>
+            <a href="/request" class="btn hidden sm:inline-block px-6 py-2 text-base">Get Started</a>
+        </div>
+    </div>
+</header>
+<script define:vars={{ adminId: import.meta.env.PUBLIC_TELEGRAM_ADMIN_ID }}>
+    function showAdminButtonIfAdmin() {
+        if (window.Telegram && window.Telegram.WebApp) {
+            const user = window.Telegram.WebApp.initDataUnsafe?.user;
+            const adminButton = document.getElementById('admin-button');
+            if (user && user.id.toString() === adminId) {
+                adminButton.classList.remove('hidden');
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', showAdminButtonIfAdmin);
+</script>

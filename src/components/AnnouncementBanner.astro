@@ -1,0 +1,22 @@
+---
+import { supabase } from '../lib/supabase';
+
+let announcementContent = null;
+try {
+  const { data } = await supabase
+    .from('announcements')
+    .select('content')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+  if (data) announcementContent = data.content;
+} catch (e) { /* Fail silently if DB is not configured */ }
+---
+{announcementContent && (
+  <div class="bg-primary/10 text-primary-dark dark:bg-primary/20 dark:text-primary-light text-center py-3 px-4 font-medium">
+    <div class="container mx-auto">
+      {announcementContent}
+    </div>
+  </div>
+)}

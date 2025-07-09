@@ -1,0 +1,28 @@
+---
+import EmailCapture from './EmailCapture.astro';
+---
+<footer class="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+    <div class="container mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-1">
+                <h3 class="text-xl font-bold mb-4">Velofy</h3>
+                <p class="text-gray-500 dark:text-gray-400">Build faster, grow smarter. Your partner for next-gen Telegram applications.</p>
+            </div>
+            <div class="md:col-span-1">
+                 <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                 <ul class="space-y-2">
+                     <li><a href="/work" class="hover:text-primary">Work</a></li>
+                     <li><a href="/pricing" class="hover:text-primary">Pricing</a></li>
+                     <li><a href="/request" class="hover:text-primary">Request a Quote</a></li>
+                 </ul>
+            </div>
+            <div class="md:col-span-1">
+                <h3 class="text-lg font-semibold mb-4">Stay Updated</h3>
+                <EmailCapture />
+            </div>
+        </div>
+        <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400">
+            <p>© {new Date().getFullYear()} Velofy. All rights reserved.</p>
+        </div>
+    </div>
+</footer>

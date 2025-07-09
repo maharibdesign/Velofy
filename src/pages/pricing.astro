@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PricingTier from '../components/PricingTier.astro';
+import { supabase } from '../lib/supabase';
+
+let tiers = [];
+try {
+    const { data, error } = await supabase.from('tiers').select('*').order('sort_order', { ascending: true });
+    if (error) throw error;
+    tiers = data || [];
+} catch (e) { /* Fail silently */ }
+---
+<Layout title="Pricing">
+  <div class="container mx-auto px-6 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-extrabold">Flexible Pricing for Every Need</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">Choose the plan that's right for you. All plans are customizable.</p>
+    </div>
+    {tiers.length > 0 ? (
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto items-start">
+        {tiers.map(t => <PricingTier name={t.name} price={t.price} features={t.features} isPopular={t.is_popular} />)}
+      </div>
+    ) : (
+      <div class="text-center py-12 card"><p class="text-xl">Pricing is being updated. Contact us for a custom quote.</p></div>
+    )}
+  </div>
+</Layout>

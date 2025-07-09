@@ -1,0 +1,32 @@
+<form id="subscribe-form" class="flex items-center">
+    <input type="email" name="email" id="email-input" placeholder="your@email.com" required class="input-field rounded-r-none flex-grow" />
+    <button type="submit" class="btn px-6 py-3 rounded-l-none text-base">Subscribe</button>
+</form>
+<p id="subscribe-status" class="mt-2 text-sm h-5 text-center"></p>
+
+<script>
+    import { supabase } from '../lib/supabase';
+    const form = document.getElementById('subscribe-form');
+    const statusEl = document.getElementById('subscribe-status');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        statusEl.textContent = 'Subscribing...';
+        statusEl.className = 'mt-2 text-sm h-5 text-gray-500 text-center';
+        
+        const formData = new FormData(form);
+        const email = formData.get('email');
+        if (!email) return;
+
+        try {
+          const { error } = await supabase.from('emails').insert({ email });
+          if (error) throw error;
+          statusEl.textContent = 'Success! Thanks for subscribing.';
+          statusEl.className = 'mt-2 text-sm h-5 text-green-500 text-center';
+          (form as HTMLFormElement).reset();
+        } catch (error) {
+          statusEl.textContent = 'Error: Already subscribed or invalid email.';
+          statusEl.className = 'mt-2 text-sm h-5 text-red-500 text-center';
+        }
+    });
+</script>

@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { supabase } from '../lib/supabase';
+
+let projects = [];
+try {
+  const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+  if (error) throw error;
+  projects = data || [];
+} catch (e) { /* Fail silently if DB is not configured */ }
+---
+<Layout title="Our Work">
+  <div class="container mx-auto px-6 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-extrabold">Case Studies</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">See how we've helped businesses succeed on Telegram.</p>
+    </div>
+    {projects.length > 0 ? (
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {projects.map(p => <ProjectCard title={p.title} description={p.description} imageUrl={p.image_url} techStack={p.tech_stack} results={p.results} />)}
+      </div>
+    ) : (
+      <div class="text-center py-12 card"><p class="text-xl">We're busy building! New case studies coming soon.</p></div>
+    )}
+  </div>
+</Layout>

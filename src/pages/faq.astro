@@ -1,0 +1,22 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FAQAccordion from '../components/FAQAccordion.astro';
+
+const faqs = [
+    { q: "Do I need a bot, a Mini App, or both?", a: "It depends on your goals. A bot is great for simple commands and notifications. A Mini App provides a full web-like interface for complex tasks like e-commerce or dashboards. Often, a combination of both is best." },
+    { q: "How long does it take to build a Mini App?", a: "A simple Mini App can take 2-4 weeks, while complex applications can take 2-3 months. We provide a detailed timeline after our initial discovery call." },
+    { q: "What are the costs involved?", a: "Costs vary based on complexity. Our pricing tiers give a general idea, but we provide a custom quote for every project. Factors include design complexity, backend requirements, and third-party integrations." },
+    { q: "Can you integrate with my existing systems?", a: "Absolutely. We can connect your Mini App to your existing CRM, e-commerce platform (like Shopify), or any other system with an API." },
+];
+---
+<Layout title="FAQ">
+  <div class="container mx-auto px-6 py-16 max-w-3xl">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-extrabold">Frequently Asked Questions</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">Answers to common questions about our process and services.</p>
+    </div>
+    <div class="card p-4 md:p-8">
+      {faqs.map(faq => <FAQAccordion question={faq.q}><p>{faq.a}</p></FAQAccordion>)}
+    </div>
+  </div>
+</Layout>
