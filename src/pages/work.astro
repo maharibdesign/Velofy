@@ -5,23 +5,42 @@ import { supabase } from '../lib/supabase';
 
 let projects = [];
 try {
-  const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .order('created_at', { ascending: false });
+
   if (error) throw error;
   projects = data || [];
-} catch (e) { /* Fail silently if DB is not configured */ }
+} catch (e) {
+  console.error("Failed to fetch projects:", (e as Error).message);
+}
 ---
+
 <Layout title="Our Work">
   <div class="container mx-auto px-6 py-16">
     <div class="text-center mb-12">
       <h1 class="text-4xl font-extrabold">Case Studies</h1>
       <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">See how we've helped businesses succeed on Telegram.</p>
     </div>
+
     {projects.length > 0 ? (
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {projects.map(p => <ProjectCard title={p.title} description={p.description} imageUrl={p.image_url} techStack={p.tech_stack} results={p.results} />)}
+        {projects.map(project => (
+          <ProjectCard
+            title={project.title}
+            description={project.description}
+            imageUrl={project.image_url}
+            techStack={project.tech_stack || []}
+            results={project.results}
+          />
+        ))}
       </div>
     ) : (
-      <div class="text-center py-12 card"><p class="text-xl">We're busy building! New case studies coming soon.</p></div>
+      <div class="text-center py-12 card">
+        <p class="text-xl">We're busy building! New case studies coming soon.</p>
+        <p class="text-gray-500 mt-2">Check back later or visit the admin panel to add a project.</p>
+      </div>
     )}
   </div>
 </Layout>

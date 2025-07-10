@@ -1,80 +1,110 @@
 ---
 import Layout from '../layouts/Layout.astro';
+// Note: This Admin page uses client-side rendering for the UI after login.
+// This is a common pattern in Astro for highly dynamic sections.
 ---
+
 <Layout title="Admin Panel">
-  <div class="container mx-auto px-6 py-12 min-h-screen">
-    <div id="auth-container" class="max-w-md mx-auto">
-      <!-- Login Form -->
-      <div id="login-form-wrapper" class="hidden card p-8">
-        <h2 class="text-2xl font-bold text-center mb-6">Admin Login</h2>
-        <form id="login-form">
-          <div class="space-y-4">
+  <div class="container mx-auto px-6 py-12 min-h-[70vh]">
+    <!-- This div will be shown to logged-in users -->
+    <div id="admin-panel" class="hidden">
+        <div class="flex justify-between items-center mb-8">
             <div>
-              <label for="email" class="block mb-2 font-medium">Email</label>
-              <input type="email" id="email" name="email" class="input-field" required>
+                <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+                <p id="admin-email" class="text-gray-500"></p>
             </div>
-            <div>
-              <label for="password" class="block mb-2 font-medium">Password</label>
-              <input type="password" id="password" name="password" class="input-field" required>
-            </div>
+            <button id="logout-btn" class="btn btn-secondary px-4 py-2 text-sm">Logout</button>
+        </div>
+
+        <!-- Admin content will be rendered here by client-side JS -->
+        <div id="admin-content" class="space-y-8">
+            <p class="card p-6 text-center">Loading admin data...</p>
+            <!-- A more advanced implementation would render forms here to manage:
+                 - Announcements
+                 - Projects (Case Studies)
+                 - Pricing Tiers
+                 - View Requests & Email Subscribers
+            -->
+        </div>
+    </div>
+
+    <!-- This div will be shown to logged-out users -->
+    <div id="login-form-wrapper" class="max-w-md mx-auto mt-16 card p-8">
+      <h2 class="text-2xl font-bold text-center mb-6">Admin Login</h2>
+      <form id="login-form">
+        <div class="space-y-4">
+          <div>
+            <label for="email" class="block mb-2 font-medium">Email</label>
+            <input type="email" id="email" name="email" class="input-field" required>
+          </div>
+          <div>
+            <label for="password" class="block mb-2 font-medium">Password</label>
+            <input type="password" id="password" name="password" class="input-field" required>
+          </div>
+          <div>
             <button type="submit" class="btn w-full">Log In</button>
             <p id="login-status" class="text-center mt-4 h-5 text-red-500"></p>
           </div>
-        </form>
-      </div>
-      <!-- Admin Panel -->
-      <div id="admin-panel" class="hidden">
-        <div class="flex justify-between items-center mb-8">
-          <h1 class="text-3xl font-bold">Admin Dashboard</h1>
-          <button id="logout-btn" class="btn btn-secondary px-4 py-2 text-sm">Logout</button>
         </div>
-        <div class="space-y-6">
-          <div class="card p-6">
-            <h3 class="font-bold text-lg mb-2">Content Management</h3>
-            <p>Welcome, Admin! This is a placeholder for the full admin UI. In a full build, you would have forms here to Add, Edit, and Delete projects, pricing tiers, and announcements directly from this page.</p>
-            <p class="mt-4">You would also see a list of incoming project requests and newsletter subscribers fetched from the Supabase database.</p>
-          </div>
-        </div>
-      </div>
+      </form>
+       <p class="text-center mt-4 text-sm text-gray-500">Don't have an account? Sign up via the Supabase Dashboard under Authentication.</p>
     </div>
   </div>
 </Layout>
 
 <script>
-  import { supabase } from '../lib/supabase';
-  const loginWrapper = document.getElementById('login-form-wrapper');
-  const adminPanel = document.getElementById('admin-panel');
-  const loginForm = document.getElementById('login-form');
-  const loginStatus = document.getElementById('login-status');
-  const logoutBtn = document.getElementById('logout-btn');
+    import { supabase } from '../lib/supabase';
 
-  async function checkSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      loginWrapper.classList.add('hidden');
-      adminPanel.classList.remove('hidden');
-    } else {
-      loginWrapper.classList.remove('hidden');
-      adminPanel.classList.add('hidden');
+    const loginWrapper = document.getElementById('login-form-wrapper');
+    const adminPanel = document.getElementById('admin-panel');
+    const adminEmailEl = document.getElementById('admin-email');
+    const loginForm = document.getElementById('login-form') as HTMLFormElement;
+    const loginStatus = document.getElementById('login-status');
+    const logoutBtn = document.getElementById('logout-btn');
+    const adminContent = document.getElementById('admin-content');
+
+
+    async function checkSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            loginWrapper.classList.add('hidden');
+            adminPanel.classList.remove('hidden');
+            adminEmailEl.textContent = `Logged in as ${session.user.email}`;
+            // Here you would fetch and render the admin data
+            adminContent.innerHTML = `
+                <div class="card p-6">
+                    <h3 class="font-bold text-xl mb-4">Content Management</h3>
+                    <p>This is where you would add forms to create, edit, and delete projects, pricing tiers, and announcements. This requires more extensive client-side JavaScript to interact with the Supabase API.</p>
+                </div>
+            `;
+        } else {
+            loginWrapper.classList.remove('hidden');
+            adminPanel.classList.add('hidden');
+        }
     }
-  }
 
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    loginStatus.textContent = '';
-    const { email, password } = Object.fromEntries(new FormData(loginForm));
-    const { error } = await supabase.auth.signInWithPassword({ email: email.toString(), password: password.toString() });
-    if (error) {
-      loginStatus.textContent = error.message;
-    } else {
-      checkSession();
-    }
-  });
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginStatus.textContent = '';
+        const formData = new FormData(loginForm);
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
 
-  logoutBtn.addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    checkSession();
-  });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  checkSession();
+        if (error) {
+            loginStatus.textContent = error.message;
+        } else {
+            loginForm.reset();
+            await checkSession();
+        }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        await checkSession();
+    });
+
+    // Initial check when the page loads
+    document.addEventListener('DOMContentLoaded', checkSession);
 </script>

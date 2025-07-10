@@ -1,9 +1,13 @@
 ---
+// src/pages/index.astro
+
 import Layout from '../layouts/Layout.astro';
-import AnnouncementBanner from '../components/AnnouncementBanner.astro';
+// No need to import AnnouncementBanner here anymore
+
 ---
 <Layout title="Home">
-  <AnnouncementBanner />
+  {/* The banner is now in Layout.astro, so it will appear automatically */}
+
   <!-- Hero Section -->
   <section class="bg-white dark:bg-gray-800">
     <div class="container mx-auto px-6 py-24 text-center">

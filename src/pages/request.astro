@@ -1,12 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
+
 <Layout title="Request a Quote">
   <div class="container mx-auto px-6 py-16 max-w-2xl">
     <div class="text-center mb-12">
       <h1 class="text-4xl font-extrabold">Let's Build Something Amazing</h1>
       <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">Fill out the form below, and we'll get back to you within 24 hours.</p>
     </div>
+
     <div id="request-wrapper" class="card p-8">
       <form id="request-form">
         <div class="space-y-6">
@@ -15,19 +17,20 @@ import Layout from '../layouts/Layout.astro';
             <input type="text" id="full_name" name="full_name" class="input-field" required>
           </div>
           <div>
-            <label for="telegram_handle" class="block mb-2 font-medium">Telegram Handle</label>
-            <input type="text" id="telegram_handle" name="telegram_handle" class="input-field" placeholder="@username" required>
+            <label for="telegram_handle" class="block mb-2 font-medium">Telegram Handle (e.g., @username)</label>
+            <input type="text" id="telegram_handle" name="telegram_handle" class="input-field" required>
           </div>
           <div>
             <label for="business_type" class="block mb-2 font-medium">Channel/Business Type</label>
-            <input type="text" id="business_type" name="business_type" class="input-field" placeholder="e.g., E-commerce, Community">
+            <input type="text" id="business_type" name="business_type" class="input-field" placeholder="e.g., E-commerce, Community, SaaS">
           </div>
           <div>
             <label for="budget" class="block mb-2 font-medium">Budget Range</label>
             <select id="budget" name="budget" class="input-field">
               <option>$1,000 - $5,000</option>
               <option>$5,000 - $10,000</option>
-              <option>$10,000+</option>
+              <option>$10,000 - $25,000</option>
+              <option>$25,000+</option>
             </select>
           </div>
           <div>
@@ -41,16 +44,22 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </form>
     </div>
+
     <div id="confirmation-message" class="hidden text-center card p-8">
-      <h2 class="text-3xl font-bold text-primary mb-4">Thank You!</h2>
-      <p class="text-lg mb-6">Your request has been received. We'll be in touch via Telegram shortly.</p>
-      <a href="https://t.me/telegram" target="_blank" class="btn">Open Telegram</a>
+        <h2 class="text-3xl font-bold text-primary mb-4">Thank You!</h2>
+        <p class="text-lg mb-6">Your request has been received. We'll be in touch via Telegram shortly.</p>
+        <a href="https://t.me/telegram" target="_blank" class="btn">
+            Open Telegram
+        </a>
     </div>
+
   </div>
 </Layout>
+
 <script>
     import { supabase } from '../lib/supabase';
-    const form = document.getElementById('request-form');
+
+    const form = document.getElementById('request-form') as HTMLFormElement;
     const statusEl = document.getElementById('form-status');
     const submitBtn = document.getElementById('submit-btn');
     const formWrapper = document.getElementById('request-wrapper');
@@ -60,17 +69,19 @@ import Layout from '../layouts/Layout.astro';
         e.preventDefault();
         submitBtn.setAttribute('disabled', 'true');
         statusEl.textContent = 'Submitting...';
+
         const formData = new FormData(form);
         const requestData = Object.fromEntries(formData.entries());
-        try {
-          const { error } = await supabase.from('requests').insert([requestData]);
-          if (error) throw error;
-          formWrapper.classList.add('hidden');
-          confirmationMsg.classList.remove('hidden');
-        } catch (error) {
-          statusEl.textContent = `Error: Please try again.`;
-          statusEl.classList.add('text-red-500');
-          submitBtn.removeAttribute('disabled');
+
+        const { error } = await supabase.from('requests').insert([requestData]);
+
+        if (error) {
+            statusEl.textContent = `Error: ${error.message}`;
+            if (statusEl) statusEl.classList.add('text-red-500');
+            submitBtn.removeAttribute('disabled');
+        } else {
+            formWrapper.classList.add('hidden');
+            confirmationMsg.classList.remove('hidden');
         }
     });
 </script>
