@@ -2,40 +2,80 @@
 import DarkModeToggle from './DarkModeToggle.astro';
 
 const navLinks = [
+    { href: "/", text: "Home" },
     { href: "/work", text: "Work" },
     { href: "/pricing", text: "Pricing" },
     { href: "/faq", text: "FAQ" },
+    { href: "/request", text: "Get Started" },
 ];
 ---
-<header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
+<header id="site-header" class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
         <a href="/" class="flex items-center space-x-2">
              <img src="/logo-light.svg" alt="Velofy Logo" class="h-8 w-auto block dark:hidden">
              <img src="/logo-dark.svg" alt="Velofy Logo" class="h-8 w-auto hidden dark:block">
         </a>
+        
+        <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center space-x-8">
-            {navLinks.map(link => (
+            {navLinks.slice(1, 4).map(link => ( // Shows Work, Pricing, FAQ
                 <a href={link.href} class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">{link.text}</a>
             ))}
         </nav>
+        
         <div class="flex items-center space-x-4">
             <DarkModeToggle />
-            <a href="/admin" id="admin-button" class="btn-secondary hidden rounded-lg px-3 py-2 text-sm font-semibold">
-                Admin
-            </a>
+            
             <a href="/request" class="btn hidden sm:inline-block px-6 py-2 text-base">Get Started</a>
+
+            <!-- Mobile Menu Button (Hamburger) -->
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
     </div>
 </header>
-<script define:vars={{ adminId: import.meta.env.PUBLIC_TELEGRAM_ADMIN_ID }}>
-    function showAdminButtonIfAdmin() {
-        if (window.Telegram && window.Telegram.WebApp) {
-            const user = window.Telegram.WebApp.initDataUnsafe?.user;
-            const adminButton = document.getElementById('admin-button');
-            if (user && user.id.toString() === adminId) {
-                adminButton.classList.remove('hidden');
-            }
-        }
+
+<!-- Mobile Menu Overlay -->
+<div id="mobile-menu" class="hidden fixed inset-0 z-40 bg-white dark:bg-gray-900 md:hidden">
+    <div class="flex flex-col items-center justify-center h-full pt-16">
+        <nav class="flex flex-col items-center space-y-8">
+            {navLinks.map(link => (
+                <a href={link.href} class="text-2xl font-bold text-gray-800 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">{link.text}</a>
+            ))}
+        </nav>
+    </div>
+</div>
+
+<script>
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const openIcon = document.getElementById('menu-open-icon');
+    const closeIcon = document.getElementById('menu-close-icon');
+    const siteHeader = document.getElementById('site-header'); // Get header to adjust z-index
+
+    function toggleMenu() {
+        const isMenuOpen = !mobileMenu.classList.contains('hidden');
+        mobileMenu.classList.toggle('hidden');
+        openIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+        
+        // Prevent body scroll when menu is open
+        document.body.style.overflow = isMenuOpen ? '' : 'hidden';
+        
+        // Bring header to front when menu is open
+        siteHeader.style.zIndex = isMenuOpen ? '50' : '60';
     }
-    document.addEventListener('DOMContentLoaded', showAdminButtonIfAdmin);
+
+    mobileMenuButton.addEventListener('click', toggleMenu);
+
+    // Close menu if a link is clicked
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (!mobileMenu.classList.contains('hidden')) {
+                toggleMenu();
+            }
+        });
+    });
 </script>
