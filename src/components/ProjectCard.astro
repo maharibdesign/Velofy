@@ -5,25 +5,36 @@ interface Props {
     imageUrl: string;
     techStack: string[];
     results: string;
+    projectUrl?: string; // <-- New optional prop
 }
-const { title, description, imageUrl, techStack, results } = Astro.props;
+const { title, description, imageUrl, techStack, results, projectUrl } = Astro.props;
 ---
-<div class="card overflow-hidden group">
+<div class="card overflow-hidden group flex flex-col h-full">
     <img src={imageUrl || 'https://placehold.co/600x400/007aff/FFFFFF?text=Project'} alt={`Screenshot of ${title}`} class="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105" />
-    <div class="p-6">
+    <div class="p-6 flex flex-col flex-grow">
         <h3 class="text-2xl font-bold mb-2">{title}</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">{description}</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 flex-grow">{description}</p>
+        
         <div class="mb-4">
             <h4 class="font-semibold text-sm uppercase text-gray-500 dark:text-gray-400 mb-2">Tech Stack</h4>
             <div class="flex flex-wrap gap-2">
-                {techStack?.map(tech => (
+                {techStack.map(tech => (
                     <span class="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light text-xs font-semibold px-2.5 py-1 rounded-full">{tech}</span>
                 ))}
             </div>
         </div>
-        <div>
+        
+        <div class="mb-6">
             <h4 class="font-semibold text-sm uppercase text-gray-500 dark:text-gray-400 mb-2">Results</h4>
             <p class="text-gray-700 dark:text-gray-200 font-medium">{results}</p>
         </div>
+
+        <!-- ================== NEW "VISIT PROJECT" BUTTON ================== -->
+        {projectUrl && (
+            <a href={projectUrl} target="_blank" rel="noopener noreferrer" class="btn btn-secondary w-full text-center mt-auto">
+                Visit Project
+            </a>
+        )}
+        <!-- ================================================================ -->
     </div>
 </div>
