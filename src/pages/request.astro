@@ -20,19 +20,34 @@ import Layout from '../layouts/Layout.astro';
             <label for="telegram_handle" class="block mb-2 font-medium">Telegram Handle (e.g., @username)</label>
             <input type="text" id="telegram_handle" name="telegram_handle" class="input-field" required>
           </div>
+
+          <!-- ================== CHANGE #1: BUSINESS TYPE DROPDOWN ================== -->
           <div>
             <label for="business_type" class="block mb-2 font-medium">Channel/Business Type</label>
-            <input type="text" id="business_type" name="business_type" class="input-field" placeholder="e.g., E-commerce, Community, SaaS">
-          </div>
-          <div>
-            <label for="budget" class="block mb-2 font-medium">Budget Range</label>
-            <select id="budget" name="budget" class="input-field">
-              <option>$1,000 - $5,000</option>
-              <option>$5,000 - $10,000</option>
-              <option>$10,000 - $25,000</option>
-              <option>$25,000+</option>
+            <select id="business_type" name="business_type" class="input-field" required>
+              <option value="" disabled selected>Select a type...</option>
+              <option>E-commerce / Store</option>
+              <option>Community / Social Platform</option>
+              <option>Content & Media</option>
+              <option>Business Tool / SaaS</option>
+              <option>Gaming & Entertainment</option>
+              <option>Other</option>
             </select>
           </div>
+          <!-- ====================================================================== -->
+          
+          <!-- ================== CHANGE #2: UPDATED BUDGET RANGE =================== -->
+          <div>
+            <label for="budget" class="block mb-2 font-medium">Budget Range</label>
+            <select id="budget" name="budget" class="input-field" required>
+              <option>0 - 5,000 Birr</option>
+              <option>5,000 - 7,500 Birr</option>
+              <option>7,500 - 10,000 Birr</option>
+              <option>10,000+ Birr</option>
+            </select>
+          </div>
+          <!-- ====================================================================== -->
+          
           <div>
             <label for="message" class="block mb-2 font-medium">Tell us about your project</label>
             <textarea id="message" name="message" rows="5" class="input-field" required></textarea>
@@ -58,7 +73,7 @@ import Layout from '../layouts/Layout.astro';
 
 <script>
     import { supabase } from '../lib/supabase';
-
+    
     const form = document.getElementById('request-form') as HTMLFormElement;
     const statusEl = document.getElementById('form-status');
     const submitBtn = document.getElementById('submit-btn');
@@ -72,7 +87,7 @@ import Layout from '../layouts/Layout.astro';
 
         const formData = new FormData(form);
         const requestData = Object.fromEntries(formData.entries());
-
+        
         const { error } = await supabase.from('requests').insert([requestData]);
 
         if (error) {
