@@ -1,11 +1,8 @@
 ---
-// src/pages/index.astro
-
 import Layout from '../layouts/Layout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import { supabase } from '../lib/supabase';
 
-// Fetch the 4 most recent projects to feature on the homepage
 let featuredProjects = [];
 try {
   const { data, error } = await supabase
@@ -28,16 +25,11 @@ const processSteps = [
 ---
 <Layout title="Home - Expert Telegram Mini App & Bot Development">
   
-  <!-- NEW: Modernized Hero Section -->
   <section class="relative bg-gray-900 text-white overflow-hidden">
-    <!-- Background Image -->
     <div class="absolute inset-0 z-0">
-      <!-- You can replace this with your own high-tech background image -->
       <img src="https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Abstract background" class="w-full h-full object-cover opacity-20 filter blur-sm">
       <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent"></div>
     </div>
-    
-    <!-- Hero Content -->
     <div class="relative z-10 container mx-auto px-6 py-32 text-center">
       <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-white">
         Build <span class="text-primary">Faster</span>, Grow <span class="text-primary">Smarter</span>
@@ -49,7 +41,6 @@ const processSteps = [
     </div>
   </section>
 
-  <!-- Why Choose Us Section -->
   <section class="py-20 bg-white dark:bg-gray-800">
     <div class="container mx-auto px-6">
       <div class="text-center mb-12">
@@ -66,7 +57,6 @@ const processSteps = [
     </div>
   </section>
 
-  <!-- Featured Work Section with a Grid -->
   {featuredProjects.length > 0 && (
     <section class="py-20 bg-gray-50 dark:bg-gray-900">
       <div class="container mx-auto px-6">
@@ -74,9 +64,21 @@ const processSteps = [
           <h2 class="text-3xl md:text-4xl font-extrabold">Our Recent Work</h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">A glimpse into the quality and impact of our solutions.</p>
         </div>
+
+        <!-- ================== THIS IS THE FIX ================== -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {featuredProjects.map(project => (<ProjectCard {...project} />))}
+            {featuredProjects.map(project => (
+                <ProjectCard
+                    title={project.title}
+                    description={project.description}
+                    imageUrl={project.image_url}  
+                    techStack={project.tech_stack}
+                    results={project.results}
+                />
+            ))}
         </div>
+        <!-- ====================================================== -->
+        
         <div class="text-center mt-12">
             <a href="/work" class="btn btn-secondary">View All Case Studies</a>
         </div>
@@ -84,7 +86,6 @@ const processSteps = [
     </section>
   )}
 
-  <!-- Our Process Section -->
   <section class="py-20 bg-white dark:bg-gray-800">
       <div class="container mx-auto px-6">
           <div class="text-center mb-12">
