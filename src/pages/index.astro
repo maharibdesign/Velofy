@@ -2,41 +2,115 @@
 // src/pages/index.astro
 
 import Layout from '../layouts/Layout.astro';
-// No need to import AnnouncementBanner here anymore
+import ProjectCard from '../components/ProjectCard.astro';
+import { supabase } from '../lib/supabase';
 
+// Fetch the most recent project to feature on the homepage
+let featuredProject = null;
+try {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single(); // .single() is efficient for fetching one row
+
+  if (error && error.code !== 'PGRST116') { // Ignore 'PGRST116' (No rows found)
+      throw error;
+  }
+  featuredProject = data;
+} catch (e) {
+  console.error("Homepage - Failed to fetch featured project:", (e as Error).message);
+}
+
+const processSteps = [
+    { name: "Discover & Strategize", description: "We dive deep into your goals to create a winning strategy for your Telegram presence." },
+    { name: "Design & Develop", description: "Our team designs a beautiful, intuitive UI and builds a robust, scalable Mini App or bot." },
+    { name: "Launch & Grow", description: "We handle the launch and provide ongoing support to ensure your project succeeds and grows." },
+];
 ---
-<Layout title="Home">
-  {/* The banner is now in Layout.astro, so it will appear automatically */}
-
-  <!-- Hero Section -->
+<Layout title="Home - Expert Telegram Mini App & Bot Development">
+  <!-- Hero Section (Unchanged) -->
   <section class="bg-white dark:bg-gray-800">
     <div class="container mx-auto px-6 py-24 text-center">
       <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
         Build <span class="text-primary">Faster</span>, Grow <span class="text-primary">Smarter</span>
       </h1>
       <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-        Velofy is your expert partner for crafting powerful Telegram Mini Apps and automation bots that engage users and drive business growth.
+        Velofy is a premier agency specializing in high-performance Telegram Mini Apps and automation bots that deliver real business results.
       </p>
       <a href="/request" class="btn">Start Your Project</a>
     </div>
   </section>
-  <!-- Features Grid -->
-  <section class="py-20">
+
+  <!-- NEW: Why Choose Us Section -->
+  <section class="py-20 bg-gray-50 dark:bg-gray-900">
     <div class="container mx-auto px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-extrabold">Why Velofy?</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-300 mt-2 max-w-2xl mx-auto">
+            We don't just build apps. We build revenue-generating engines inside Telegram.
+        </p>
+      </div>
       <div class="grid md:grid-cols-3 gap-8 text-center">
         <div class="p-6">
-          <h3 class="text-2xl font-bold mb-2">Seamless Integration</h3>
-          <p class="text-gray-600 dark:text-gray-300">Create web-like experiences directly inside the world's most secure messaging app.</p>
+          <h3 class="text-2xl font-bold mb-2">Telegram-Native Experts</h3>
+          <p class="text-gray-600 dark:text-gray-300">We live and breathe the Telegram ecosystem. Our solutions are optimized for its unique platform capabilities, ensuring a seamless user experience.</p>
         </div>
         <div class="p-6">
-          <h3 class="text-2xl font-bold mb-2">User Engagement</h3>
-          <p class="text-gray-600 dark:text-gray-300">Leverage bots and mini apps to build interactive communities and loyal customer bases.</p>
+          <h3 class="text-2xl font-bold mb-2">Focus on ROI</h3>
+          <p class="text-gray-600 dark:text-gray-300">Every feature we build is tied to a business goal. We focus on creating apps that increase engagement, drive sales, and boost your bottom line.</p>
         </div>
         <div class="p-6">
-          <h3 class="text-2xl font-bold mb-2">E-commerce Power</h3>
-          <p class="text-gray-600 dark:text-gray-300">From simple product catalogs to full-fledged payment systems, sell directly on Telegram.</p>
+          <h3 class="text-2xl font-bold mb-2">Full-Service Partnership</h3>
+          <p class="text-gray-600 dark:text-gray-300">From initial strategy and design to development, launch, and ongoing support, we're your dedicated partner for long-term success on Telegram.</p>
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- NEW: Featured Work Section -->
+  {featuredProject && (
+    <section class="py-20">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-extrabold">Featured Work</h2>
+          <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">A glimpse into the quality and impact of our solutions.</p>
+        </div>
+        <div class="max-w-4xl mx-auto">
+            <ProjectCard
+                title={featuredProject.title}
+                description={featuredProject.description}
+                imageUrl={featuredProject.image_url}
+                techStack={featuredProject.tech_stack || []}
+                results={featuredProject.results}
+            />
+        </div>
+        <div class="text-center mt-12">
+            <a href="/work" class="btn btn-secondary">View All Case Studies</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- NEW: Our Process Section -->
+  <section class="py-20 bg-gray-50 dark:bg-gray-900">
+      <div class="container mx-auto px-6">
+          <div class="text-center mb-12">
+              <h2 class="text-3xl md:text-4xl font-extrabold">Our Proven Process</h2>
+              <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">Simplicity, transparency, and results at every step.</p>
+          </div>
+          <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              {processSteps.map((step, index) => (
+                  <div class="card p-6">
+                      <div class="flex items-center justify-center mb-4">
+                          <span class="flex items-center justify-center w-12 h-12 bg-primary/10 text-primary font-bold text-xl rounded-full">{index + 1}</span>
+                      </div>
+                      <h3 class="text-xl font-bold mb-2">{step.name}</h3>
+                      <p class="text-gray-600 dark:text-gray-300">{step.description}</p>
+                  </div>
+              ))}
+          </div>
+      </div>
   </section>
 </Layout>
