@@ -1,81 +1,75 @@
 ---
 import DarkModeToggle from './DarkModeToggle.astro';
 
+// We now include "Home" for the mobile icon view
 const navLinks = [
     { href: "/", text: "Home" },
     { href: "/work", text: "Work" },
     { href: "/pricing", text: "Pricing" },
     { href: "/faq", text: "FAQ" },
-    { href: "/request", text: "Get Started" },
 ];
 ---
-<header id="site-header" class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="flex items-center space-x-2">
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+        <!-- Logo -->
+        <a href="/" class="flex-shrink-0 flex items-center space-x-2">
              <img src="/logo-light.svg" alt="Velofy Logo" class="h-8 w-auto block dark:hidden">
              <img src="/logo-dark.svg" alt="Velofy Logo" class="h-8 w-auto hidden dark:block">
         </a>
         
-        <!-- Desktop Navigation -->
+        <!-- Mobile Icon Navigation (replaces text links on mobile) -->
+        <nav class="flex md:hidden flex-grow justify-center items-center space-x-6">
+            <a href="/" class="p-2 text-gray-600 dark:text-gray-300 hover:text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            </a>
+            <a href="/work" class="p-2 text-gray-600 dark:text-gray-300 hover:text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </a>
+            <a href="/pricing" class="p-2 text-gray-600 dark:text-gray-300 hover:text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+            </a>
+            <a href="/faq" class="p-2 text-gray-600 dark:text-gray-300 hover:text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </a>
+        </nav>
+
+        <!-- Desktop Text Navigation -->
         <nav class="hidden md:flex items-center space-x-8">
-            {navLinks.slice(1, 4).map(link => ( // Shows Work, Pricing, FAQ
-                <a href={link.href} class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">{link.text}</a>
+            {navLinks.slice(1).map(link => ( // Shows Work, Pricing, FAQ
+                <a href={link.href} class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">{link.text}</a>
             ))}
         </nav>
         
-        <div class="flex items-center space-x-4">
+        <!-- Right-side controls -->
+        <div class="flex-shrink-0 flex items-center space-x-2 sm:space-x-4">
             <DarkModeToggle />
             
-            <a href="/request" class="btn hidden sm:inline-block px-6 py-2 text-base">Get Started</a>
-
-            <!-- Mobile Menu Button (Hamburger) -->
-            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
-                <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+            <!-- Admin Button (Restored) -->
+            <a href="/admin" id="admin-button" class="btn-secondary hidden rounded-lg px-3 py-2 text-sm font-semibold">
+                Admin
+            </a>
+            
+            <a href="/request" class="btn hidden sm:inline-block px-5 py-2 text-base">Get Started</a>
         </div>
     </div>
 </header>
 
-<!-- Mobile Menu Overlay -->
-<div id="mobile-menu" class="hidden fixed inset-0 z-40 bg-white dark:bg-gray-900 md:hidden">
-    <div class="flex flex-col items-center justify-center h-full pt-16">
-        <nav class="flex flex-col items-center space-y-8">
-            {navLinks.map(link => (
-                <a href={link.href} class="text-2xl font-bold text-gray-800 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">{link.text}</a>
-            ))}
-        </nav>
-    </div>
-</div>
-
-<script>
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const openIcon = document.getElementById('menu-open-icon');
-    const closeIcon = document.getElementById('menu-close-icon');
-    const siteHeader = document.getElementById('site-header'); // Get header to adjust z-index
-
-    function toggleMenu() {
-        const isMenuOpen = !mobileMenu.classList.contains('hidden');
-        mobileMenu.classList.toggle('hidden');
-        openIcon.classList.toggle('hidden');
-        closeIcon.classList.toggle('hidden');
-        
-        // Prevent body scroll when menu is open
-        document.body.style.overflow = isMenuOpen ? '' : 'hidden';
-        
-        // Bring header to front when menu is open
-        siteHeader.style.zIndex = isMenuOpen ? '50' : '60';
-    }
-
-    mobileMenuButton.addEventListener('click', toggleMenu);
-
-    // Close menu if a link is clicked
-    mobileMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            if (!mobileMenu.classList.contains('hidden')) {
-                toggleMenu();
+<!-- Admin Button Script (Restored) -->
+<script define:vars={{ adminId: import.meta.env.PUBLIC_TELEGRAM_ADMIN_ID }}>
+    function showAdminButtonIfAdmin() {
+        // Use a try-catch block in case Telegram is not defined (e.g., in a normal browser)
+        try {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                const adminButton = document.getElementById('admin-button');
+                if (user && user.id.toString() === adminId) {
+                    adminButton.classList.remove('hidden');
+                }
             }
-        });
-    });
+        } catch (error) {
+            console.log('Not running inside Telegram or Telegram WebApp script failed to load.');
+        }
+    }
+    // Run the check once the page content has loaded
+    document.addEventListener('DOMContentLoaded', showAdminButtonIfAdmin);
 </script>
