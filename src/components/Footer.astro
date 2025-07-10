@@ -1,9 +1,9 @@
 ---
 import EmailCapture from './EmailCapture.astro';
-import SocialIcon from './SocialIcon.astro'; // <-- Import the new component
+import SocialIcon from './SocialIcon.astro';
 
 const socials = [
-    { name: 'telegram', href: 'https://t.me/yourchannel' }, // Replace with your actual links
+    { name: 'telegram', href: 'https://t.me/velofyminiapps' }, // <-- YOUR OFFICIAL LINK
     { name: 'instagram', href: 'https://instagram.com/yourprofile' },
     { name: 'tiktok', href: 'https://tiktok.com/@yourprofile' },
 ];
@@ -17,8 +17,6 @@ const socials = [
                     <img src="/logo-dark.svg" alt="Velofy Logo" class="h-8 w-auto hidden dark:block">
                 </a>
                 <p class="text-gray-500 dark:text-gray-400">Your partner for next-gen Telegram applications.</p>
-                
-                <!-- NEW: Cleaned-up Social Icons section -->
                 <div class="flex space-x-4 mt-6">
                     {socials.map(social => (
                         <SocialIcon name={social.name} href={social.href} />
