@@ -5,22 +5,21 @@ import Layout from '../layouts/Layout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import { supabase } from '../lib/supabase';
 
-// Fetch the most recent project to feature on the homepage
-let featuredProject = null;
+// Fetch the 4 most recent projects to feature on the homepage
+let featuredProjects = [];
 try {
   const { data, error } = await supabase
     .from('projects')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(1)
-    .single(); // .single() is efficient for fetching one row
+    .limit(4); // Fetch up to 4 projects
 
-  if (error && error.code !== 'PGRST116') { // Ignore 'PGRST116' (No rows found)
+  if (error) {
       throw error;
   }
-  featuredProject = data;
+  featuredProjects = data || [];
 } catch (e) {
-  console.error("Homepage - Failed to fetch featured project:", (e as Error).message);
+  console.error("Homepage - Failed to fetch featured projects:", (e as Error).message);
 }
 
 const processSteps = [
@@ -43,7 +42,7 @@ const processSteps = [
     </div>
   </section>
 
-  <!-- NEW: Why Choose Us Section -->
+  <!-- Why Choose Us Section (Unchanged) -->
   <section class="py-20 bg-gray-50 dark:bg-gray-900">
     <div class="container mx-auto px-6">
       <div class="text-center mb-12">
@@ -69,23 +68,28 @@ const processSteps = [
     </div>
   </section>
 
-  <!-- NEW: Featured Work Section -->
-  {featuredProject && (
+  <!-- REVISED: Featured Work Section with a Grid -->
+  {featuredProjects.length > 0 && (
     <section class="py-20">
       <div class="container mx-auto px-6">
         <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-extrabold">Featured Work</h2>
+          <h2 class="text-3xl md:text-4xl font-extrabold">Our Recent Work</h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">A glimpse into the quality and impact of our solutions.</p>
         </div>
-        <div class="max-w-4xl mx-auto">
-            <ProjectCard
-                title={featuredProject.title}
-                description={featuredProject.description}
-                imageUrl={featuredProject.image_url}
-                techStack={featuredProject.tech_stack || []}
-                results={featuredProject.results}
-            />
+        
+        <!-- Responsive Grid for Projects -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {featuredProjects.map(project => (
+                <ProjectCard
+                    title={project.title}
+                    description={project.description}
+                    imageUrl={project.image_url}
+                    techStack={project.tech_stack || []}
+                    results={project.results}
+                />
+            ))}
         </div>
+
         <div class="text-center mt-12">
             <a href="/work" class="btn btn-secondary">View All Case Studies</a>
         </div>
@@ -93,7 +97,7 @@ const processSteps = [
     </section>
   )}
 
-  <!-- NEW: Our Process Section -->
+  <!-- Our Process Section (Unchanged) -->
   <section class="py-20 bg-gray-50 dark:bg-gray-900">
       <div class="container mx-auto px-6">
           <div class="text-center mb-12">
