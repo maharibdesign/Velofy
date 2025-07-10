@@ -12,11 +12,9 @@ try {
     .from('projects')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(4); // Fetch up to 4 projects
+    .limit(4);
 
-  if (error) {
-      throw error;
-  }
+  if (error) { throw error; }
   featuredProjects = data || [];
 } catch (e) {
   console.error("Homepage - Failed to fetch featured projects:", (e as Error).message);
@@ -29,21 +27,30 @@ const processSteps = [
 ];
 ---
 <Layout title="Home - Expert Telegram Mini App & Bot Development">
-  <!-- Hero Section (Unchanged) -->
-  <section class="bg-white dark:bg-gray-800">
-    <div class="container mx-auto px-6 py-24 text-center">
-      <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
+  
+  <!-- NEW: Modernized Hero Section -->
+  <section class="relative bg-gray-900 text-white overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0 z-0">
+      <!-- You can replace this with your own high-tech background image -->
+      <img src="https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Abstract background" class="w-full h-full object-cover opacity-20 filter blur-sm">
+      <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent"></div>
+    </div>
+    
+    <!-- Hero Content -->
+    <div class="relative z-10 container mx-auto px-6 py-32 text-center">
+      <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-white">
         Build <span class="text-primary">Faster</span>, Grow <span class="text-primary">Smarter</span>
       </h1>
-      <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+      <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">
         Velofy is a premier agency specializing in high-performance Telegram Mini Apps and automation bots that deliver real business results.
       </p>
       <a href="/request" class="btn">Start Your Project</a>
     </div>
   </section>
 
-  <!-- Why Choose Us Section (Unchanged) -->
-  <section class="py-20 bg-gray-50 dark:bg-gray-900">
+  <!-- Why Choose Us Section -->
+  <section class="py-20 bg-white dark:bg-gray-800">
     <div class="container mx-auto px-6">
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-extrabold">Why Velofy?</h2>
@@ -52,44 +59,24 @@ const processSteps = [
         </p>
       </div>
       <div class="grid md:grid-cols-3 gap-8 text-center">
-        <div class="p-6">
-          <h3 class="text-2xl font-bold mb-2">Telegram-Native Experts</h3>
-          <p class="text-gray-600 dark:text-gray-300">We live and breathe the Telegram ecosystem. Our solutions are optimized for its unique platform capabilities, ensuring a seamless user experience.</p>
-        </div>
-        <div class="p-6">
-          <h3 class="text-2xl font-bold mb-2">Focus on ROI</h3>
-          <p class="text-gray-600 dark:text-gray-300">Every feature we build is tied to a business goal. We focus on creating apps that increase engagement, drive sales, and boost your bottom line.</p>
-        </div>
-        <div class="p-6">
-          <h3 class="text-2xl font-bold mb-2">Full-Service Partnership</h3>
-          <p class="text-gray-600 dark:text-gray-300">From initial strategy and design to development, launch, and ongoing support, we're your dedicated partner for long-term success on Telegram.</p>
-        </div>
+        <div class="p-6"><h3 class="text-2xl font-bold mb-2">Telegram-Native Experts</h3><p class="text-gray-600 dark:text-gray-300">Our solutions are optimized for Telegram's unique platform capabilities, ensuring a seamless user experience.</p></div>
+        <div class="p-6"><h3 class="text-2xl font-bold mb-2">Focus on ROI</h3><p class="text-gray-600 dark:text-gray-300">We focus on creating apps that increase engagement, drive sales, and boost your bottom line.</p></div>
+        <div class="p-6"><h3 class="text-2xl font-bold mb-2">Full-Service Partnership</h3><p class="text-gray-600 dark:text-gray-300">From strategy and design to launch and support, we're your dedicated partner for long-term success.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- REVISED: Featured Work Section with a Grid -->
+  <!-- Featured Work Section with a Grid -->
   {featuredProjects.length > 0 && (
-    <section class="py-20">
+    <section class="py-20 bg-gray-50 dark:bg-gray-900">
       <div class="container mx-auto px-6">
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-extrabold">Our Recent Work</h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">A glimpse into the quality and impact of our solutions.</p>
         </div>
-        
-        <!-- Responsive Grid for Projects -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {featuredProjects.map(project => (
-                <ProjectCard
-                    title={project.title}
-                    description={project.description}
-                    imageUrl={project.image_url}
-                    techStack={project.tech_stack || []}
-                    results={project.results}
-                />
-            ))}
+            {featuredProjects.map(project => (<ProjectCard {...project} />))}
         </div>
-
         <div class="text-center mt-12">
             <a href="/work" class="btn btn-secondary">View All Case Studies</a>
         </div>
@@ -97,8 +84,8 @@ const processSteps = [
     </section>
   )}
 
-  <!-- Our Process Section (Unchanged) -->
-  <section class="py-20 bg-gray-50 dark:bg-gray-900">
+  <!-- Our Process Section -->
+  <section class="py-20 bg-white dark:bg-gray-800">
       <div class="container mx-auto px-6">
           <div class="text-center mb-12">
               <h2 class="text-3xl md:text-4xl font-extrabold">Our Proven Process</h2>

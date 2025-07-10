@@ -1,28 +1,34 @@
 ---
 // src/pages/admin.astro
 import Layout from '../layouts/Layout.astro';
+import { formatDate } from '../lib/utils.ts';
 ---
 
 <Layout title="Admin Panel">
   <div class="container mx-auto px-4 sm:px-6 py-12 min-h-[70vh]">
-    <!-- This div will be shown to logged-in users -->
+    <!-- Logged-in view -->
     <div id="admin-panel" class="hidden">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
-        <div>
-          <h1 class="text-3xl font-bold">Admin Dashboard</h1>
-          <p id="admin-email" class="text-gray-500"></p>
-        </div>
+        <div><h1 class="text-3xl font-bold">Admin Dashboard</h1><p id="admin-email" class="text-gray-500"></p></div>
         <button id="logout-btn" class="btn btn-secondary px-4 py-2 text-sm self-start sm:self-center">Logout</button>
       </div>
 
-      <!-- Admin content will be rendered here by client-side JS -->
-      <div id="admin-content" class="space-y-12">
-        <section id="announcements-section" class="card p-6"></section>
-        <section id="projects-section" class="card p-6"></section>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Left Column: Content Management -->
+        <div class="space-y-12">
+          <section id="announcements-section" class="card p-6"></section>
+          <section id="projects-section" class="card p-6"></section>
+          <section id="tiers-section" class="card p-6"></section>
+        </div>
+        <!-- Right Column: Leads & Subscribers -->
+        <div class="space-y-12">
+          <section id="requests-section" class="card p-6"></section>
+          <section id="emails-section" class="card p-6"></section>
+        </div>
       </div>
     </div>
 
-    <!-- Login Form (Unchanged) -->
+    <!-- Login Form -->
     <div id="login-form-wrapper" class="max-w-md mx-auto mt-16 card p-8">
       <h2 class="text-2xl font-bold text-center mb-6">Admin Login</h2>
       <form id="login-form">
@@ -36,156 +42,206 @@ import Layout from '../layouts/Layout.astro';
   </div>
 </Layout>
 
+<style>
+.request-message { white-space: pre-wrap; word-break: break-word; max-height: 4.5em; overflow: hidden; transition: max-height 0.3s ease-in-out; }
+.request-message.expanded { max-height: 500px; }
+.form-title { display: flex; justify-content: space-between; align-items: center; }
+</style>
+
 <script>
   import { supabase } from '../lib/supabase';
-  // <-- CHANGE #1: REMOVED the 'uuid' import. It's no longer needed. -->
+  import { formatDate } from '../lib/utils.ts';
 
   const BUCKET_NAME = 'bucketprojectimages';
+  
   const loginWrapper = document.getElementById('login-form-wrapper');
   const adminPanel = document.getElementById('admin-panel');
   const adminEmailEl = document.getElementById('admin-email');
-  const loginForm = document.getElementById('login-form') as HTMLFormElement;
+  const loginForm = document.getElementById('login-form');
   const loginStatus = document.getElementById('login-status');
   const logoutBtn = document.getElementById('logout-btn');
+
   const announcementsSection = document.getElementById('announcements-section');
   const projectsSection = document.getElementById('projects-section');
+  const tiersSection = document.getElementById('tiers-section');
+  const requestsSection = document.getElementById('requests-section');
+  const emailsSection = document.getElementById('emails-section');
 
-  let announcements = [];
-  let projects = [];
+  let state = {
+    announcements: [], projects: [], tiers: [], requests: [], emails: [],
+    editingProject: null, editingTier: null,
+  };
+
+  // --- RENDER FUNCTIONS ---
+  const renderers = {
+    announcements: () => {
+      announcementsSection.innerHTML = `
+        <h3 class="font-bold text-xl mb-4">📢 Announcements</h3>
+        <form id="announcement-form" class="space-y-4 mb-6"><textarea name="content" class="input-field" placeholder="New announcement..." required></textarea><button type="submit" class="btn text-base py-2">Post</button></form>
+        <div class="space-y-2">${state.announcements.map(a => `<div class="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"><span>${a.content}</span><button class="text-red-500" data-id="${a.id}" onclick="handlers.delete('announcements', event)">Del</button></div>`).join('') || '<p class="text-sm text-gray-500">No announcements.</p>'}</div>`;
+      document.getElementById('announcement-form').addEventListener('submit', (e) => handlers.submit('announcements', e));
+    },
+    projects: () => {
+      const p = state.editingProject || {};
+      projectsSection.innerHTML = `
+        <div class="form-title"><h3 class="font-bold text-xl mb-4">${p.id ? 'Edit Project' : 'Add Project'}</h3>${p.id ? `<button class="text-sm text-primary" onclick="handlers.cancelEdit('projects')">Cancel</button>` : ''}</div>
+        <form id="project-form" class="space-y-4 mb-6 border-b dark:border-gray-700 pb-6">
+          <input name="title" class="input-field" placeholder="Title" value="${p.title || ''}" required />
+          <textarea name="description" class="input-field" placeholder="Description">${p.description || ''}</textarea>
+          <input name="tech_stack" class="input-field" placeholder="Tech (comma-separated)" value="${(p.tech_stack || []).join(', ')}" />
+          <textarea name="results" class="input-field" placeholder="Results">${p.results || ''}</textarea>
+          <div><label class="block mb-2 text-sm font-medium">Image ${p.id ? '(Optional: Replace)' : ''}</label><input type="file" id="project-image-upload" accept="image/*" class="input-field" ${p.id ? '' : 'required'} /><p id="upload-status" class="text-sm mt-1"></p></div>
+          <button type="submit" class="btn text-base py-2">${p.id ? 'Update Project' : 'Add Project'}</button>
+        </form>
+        <div class="space-y-2">${state.projects.map(proj => `<div class="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"><span class="font-semibold">${proj.title}</span><div class="space-x-2"><button class="text-primary text-sm" data-id="${proj.id}" onclick="handlers.edit('projects', event)">Edit</button><button class="text-red-500 text-sm" data-id="${proj.id}" onclick="handlers.delete('projects', event)">Del</button></div></div>`).join('') || '<p class="text-sm text-gray-500">No projects.</p>'}</div>`;
+      document.getElementById('project-form').addEventListener('submit', (e) => handlers.submit('projects', e));
+    },
+    tiers: () => {
+        const t = state.editingTier || {};
+        tiersSection.innerHTML = `
+            <div class="form-title"><h3 class="font-bold text-xl mb-4">${t.id ? 'Edit Tier' : 'Add Pricing Tier'}</h3>${t.id ? `<button class="text-sm text-primary" onclick="handlers.cancelEdit('tiers')">Cancel</button>` : ''}</div>
+            <form id="tier-form" class="space-y-4 mb-6 border-b dark:border-gray-700 pb-6">
+                <input name="name" class="input-field" placeholder="Tier Name (e.g., Starter)" value="${t.name || ''}" required />
+                <input name="price" type="number" class="input-field" placeholder="Price (e.g., 1500)" value="${t.price || ''}" required />
+                <textarea name="features" class="input-field" placeholder="Features (one per line)">${(t.features || []).join('\n')}</textarea>
+                <input name="sort_order" type="number" class="input-field" placeholder="Sort Order (e.g., 1, 2, 3)" value="${t.sort_order || 0}" required />
+                <label class="flex items-center space-x-2"><input name="is_popular" type="checkbox" ${t.is_popular ? 'checked' : ''} /><span>Mark as "Most Popular"</span></label>
+                <button type="submit" class="btn text-base py-2">${t.id ? 'Update Tier' : 'Add Tier'}</button>
+            </form>
+            <div class="space-y-2">${state.tiers.map(tier => `<div class="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"><span class="font-semibold">${tier.name} - $${tier.price}</span><div class="space-x-2"><button class="text-primary text-sm" data-id="${tier.id}" onclick="handlers.edit('tiers', event)">Edit</button><button class="text-red-500 text-sm" data-id="${tier.id}" onclick="handlers.delete('tiers', event)">Del</button></div></div>`).join('') || '<p class="text-sm text-gray-500">No tiers.</p>'}</div>
+        `;
+        document.getElementById('tier-form').addEventListener('submit', (e) => handlers.submit('tiers', e));
+    },
+    requests: () => {
+      requestsSection.innerHTML = `
+        <h3 class="font-bold text-xl mb-4">📨 Service Requests</h3>
+        <div class="space-y-4 max-h-[40rem] lg:max-h-96 overflow-y-auto pr-2">${state.requests.map(r => `<div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg"><div class="flex justify-between items-start"><div><p class="font-bold">${r.full_name || 'N/A'}</p><a href="https://t.me/${(r.telegram_handle || '').replace('@','')}" target="_blank" class="text-primary hover:underline">${r.telegram_handle || 'N/A'}</a></div><span class="text-xs text-gray-500">${formatDate(r.created_at)}</span></div><p class="text-sm mt-2"><span class="font-semibold">Budget:</span> ${r.budget || 'N/A'}</p><p class="text-sm"><span class="font-semibold">Type:</span> ${r.business_type || 'N/A'}</p><div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600"><p class="request-message text-gray-600 dark:text-gray-300 cursor-pointer" onclick="this.classList.toggle('expanded')">${r.message || 'No message.'}</p></div></div>`).join('') || '<p class="text-sm text-gray-500">No service requests.</p>'}</div>`;
+    },
+    emails: () => {
+      emailsSection.innerHTML = `
+        <h3 class="font-bold text-xl mb-4">✉️ Subscribers</h3>
+        <div class="space-y-2 max-h-96 overflow-y-auto pr-2">${state.emails.map(e => `<div class="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"><span>${e.email}</span><span class="text-xs text-gray-500">${formatDate(e.created_at)}</span></div>`).join('') || '<p class="text-sm text-gray-500">No subscribers.</p>'}</div>`;
+    },
+  };
   
-  function renderAnnouncements() {
-    announcementsSection.innerHTML = `
-      <h3 class="font-bold text-xl mb-4">📢 Announcements</h3>
-      <form id="announcement-form" class="space-y-4 mb-6">
-        <textarea name="content" class="input-field" placeholder="New announcement text..." required></textarea>
-        <button type="submit" class="btn text-base py-2">Post Announcement</button>
-      </form>
-      <div id="announcement-list" class="space-y-2">
-        ${announcements.map(ann => `
-          <div class="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-            <span>${ann.content}</span>
-            <button class="text-red-500 hover:text-red-700" data-id="${ann.id}" onclick="deleteAnnouncement(event)">Delete</button>
-          </div>
-        `).join('') || '<p class="text-gray-500">No active announcements.</p>'}
-      </div>
-    `;
-    document.getElementById('announcement-form').addEventListener('submit', handleAnnouncementSubmit);
-  }
+  const renderAll = () => Object.values(renderers).forEach(render => render());
+
+  // --- HANDLER LOGIC ---
+  const handlers = {
+    fetch: async () => {
+      const [annData, projData, tiersData, reqData, emailData] = await Promise.all([
+        supabase.from('announcements').select('*').order('created_at', { ascending: false }),
+        supabase.from('projects').select('*').order('created_at', { ascending: false }),
+        supabase.from('tiers').select('*').order('sort_order', { ascending: true }),
+        supabase.from('requests').select('*').order('created_at', { ascending: false }),
+        supabase.from('emails').select('*').order('created_at', { ascending: false })
+      ]);
+      state = { ...state, announcements: annData.data, projects: projData.data, tiers: tiersData.data, requests: reqData.data, emails: emailData.data };
+      renderAll();
+    },
+    submit: async (type, e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+
+        if (type === 'announcements') {
+            await supabase.from('announcements').update({ is_active: false }).eq('is_active', true);
+            await supabase.from('announcements').insert({ content: formData.get('content'), is_active: true });
+        }
+        if (type === 'projects') {
+            const uploadStatus = document.getElementById('upload-status');
+            const imageFile = document.getElementById('project-image-upload').files[0];
+            let imageUrl = state.editingProject?.image_url;
+
+            if (imageFile) {
+                uploadStatus.textContent = "Uploading...";
+                const fileName = `${crypto.randomUUID()}-${imageFile.name}`;
+                const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(fileName, imageFile);
+                if (uploadError) { alert('Upload failed: ' + uploadError.message); submitBtn.disabled = false; return; }
+                imageUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName).data.publicUrl;
+                uploadStatus.textContent = "";
+            }
+
+            const projectData = {
+                title: formData.get('title'), description: formData.get('description'),
+                tech_stack: (formData.get('tech_stack') || '').split(',').map(s => s.trim()).filter(Boolean),
+                results: formData.get('results'), image_url: imageUrl
+            };
+
+            if (state.editingProject) {
+                await supabase.from('projects').update(projectData).eq('id', state.editingProject.id);
+            } else {
+                await supabase.from('projects').insert(projectData);
+            }
+            state.editingProject = null;
+        }
+        if (type === 'tiers') {
+            const tierData = {
+                name: formData.get('name'), price: formData.get('price'),
+                features: (formData.get('features') || '').split('\n').map(s => s.trim()).filter(Boolean),
+                sort_order: formData.get('sort_order'), is_popular: formData.get('is_popular') === 'on'
+            };
+            if (state.editingTier) {
+                await supabase.from('tiers').update(tierData).eq('id', state.editingTier.id);
+            } else {
+                await supabase.from('tiers').insert(tierData);
+            }
+            state.editingTier = null;
+        }
+        
+        form.reset();
+        submitBtn.disabled = false;
+        await handlers.fetch();
+    },
+    delete: async (type, e) => {
+        if (!confirm('Are you sure you want to delete this?')) return;
+        await supabase.from(type).delete().eq('id', e.target.dataset.id);
+        await handlers.fetch();
+    },
+    edit: (type, e) => {
+        const id = e.target.dataset.id;
+        if (type === 'projects') {
+            state.editingProject = state.projects.find(p => p.id == id);
+            renderers.projects();
+        }
+        if (type === 'tiers') {
+            state.editingTier = state.tiers.find(t => t.id == id);
+            renderers.tiers();
+        }
+    },
+    cancelEdit: (type) => {
+        if (type === 'projects') { state.editingProject = null; renderers.projects(); }
+        if (type === 'tiers') { state.editingTier = null; renderers.tiers(); }
+    }
+  };
   
-  function renderProjects() {
-    projectsSection.innerHTML = `
-      <h3 class="font-bold text-xl mb-4">💼 Projects (Case Studies)</h3>
-      <form id="project-form" class="space-y-4 mb-6 border-b dark:border-gray-700 pb-6">
-        <input name="title" class="input-field" placeholder="Project Title" required />
-        <textarea name="description" class="input-field" placeholder="Project Description"></textarea>
-        <input name="tech_stack" class="input-field" placeholder="Tech Stack (comma-separated)" />
-        <textarea name="results" class="input-field" placeholder="Results / Impact"></textarea>
-        <div>
-            <label class="block mb-2 font-medium">Project Image</label>
-            <input type="file" id="project-image-upload" accept="image/*" class="input-field" required />
-            <p id="upload-status" class="text-sm text-gray-500 mt-1"></p>
-        </div>
-        <button type="submit" class="btn text-base py-2">Add Project</button>
-      </form>
-      <div id="project-list" class="space-y-4">
-        ${projects.map(p => `
-          <div class="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-            <span class="font-semibold">${p.title}</span>
-            <button class="text-red-500 hover:text-red-700" data-id="${p.id}" onclick="deleteProject(event)">Delete</button>
-          </div>
-        `).join('') || '<p class="text-gray-500">No projects yet.</p>'}
-      </div>
-    `;
-    document.getElementById('project-form').addEventListener('submit', handleProjectSubmit);
-  }
-
-  async function fetchData() {
-    const { data: annData } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
-    announcements = annData || [];
-    const { data: projData } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
-    projects = projData || [];
-    renderAll();
-  }
-
-  function renderAll() {
-    renderAnnouncements();
-    renderProjects();
-  }
-
-  async function handleAnnouncementSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    await supabase.from('announcements').update({ is_active: false }).eq('is_active', true);
-    await supabase.from('announcements').insert({ content: formData.get('content'), is_active: true });
-    form.reset();
-    await fetchData();
-  }
-  
-  window.deleteAnnouncement = async (e) => {
-    if (!confirm('Are you sure?')) return;
-    await supabase.from('announcements').delete().eq('id', e.target.dataset.id);
-    await fetchData();
-  }
-  
-  async function handleProjectSubmit(e) {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const uploadStatus = document.getElementById('upload-status');
-    const submitBtn = form.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    uploadStatus.textContent = "Uploading image...";
-
-    const imageFile = (document.getElementById('project-image-upload') as HTMLInputElement).files[0];
-    if (!imageFile) { alert('Please select an image.'); submitBtn.disabled = false; return; }
-
-    // <-- CHANGE #2: USE the native browser API to generate a unique ID -->
-    const fileName = `${crypto.randomUUID()}-${imageFile.name}`;
-
-    const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(fileName, imageFile);
-    if (uploadError) { alert('Upload failed: ' + uploadError.message); submitBtn.disabled = false; return; }
-
-    uploadStatus.textContent = "Image uploaded! Saving project...";
-
-    const { data: { publicUrl } } = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
-    const formData = new FormData(form);
-    const techStack = (formData.get('tech_stack') as string).split(',').map(s => s.trim()).filter(Boolean);
-    const projectData = { title: formData.get('title'), description: formData.get('description'), tech_stack: techStack, results: formData.get('results'), image_url: publicUrl };
-
-    await supabase.from('projects').insert(projectData);
-    form.reset();
-    uploadStatus.textContent = "";
-    await fetchData();
-    submitBtn.disabled = false;
-  }
-
-  window.deleteProject = async (e) => {
-    if (!confirm('Are you sure?')) return;
-    await supabase.from('projects').delete().eq('id', e.target.dataset.id);
-    await fetchData();
-  }
-
+  // --- AUTH LOGIC ---
   async function checkSession() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      loginWrapper.classList.add('hidden');
-      adminPanel.classList.remove('hidden');
+      loginWrapper.style.display = 'none';
+      adminPanel.style.display = 'block';
       adminEmailEl.textContent = `Logged in as ${session.user.email}`;
-      await fetchData();
+      await handlers.fetch();
     } else {
-      loginWrapper.classList.remove('hidden');
-      adminPanel.classList.add('hidden');
+      loginWrapper.style.display = 'block';
+      adminPanel.style.display = 'none';
     }
   }
 
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(loginForm);
-    const { error } = await supabase.auth.signInWithPassword({ email: formData.get('email') as string, password: formData.get('password') as string });
+    const { error } = await supabase.auth.signInWithPassword({ email: formData.get('email'), password: formData.get('password') });
     if (error) loginStatus.textContent = error.message;
     else { loginForm.reset(); await checkSession(); }
   });
 
   logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); await checkSession(); });
   document.addEventListener('DOMContentLoaded', checkSession);
+
+  // Expose handlers to global scope for onclick attributes
+  window.handlers = handlers;
 </script>
