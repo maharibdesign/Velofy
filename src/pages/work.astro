@@ -27,14 +27,17 @@ try {
     {projects.length > 0 ? (
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {projects.map(project => (
+          // ================== THIS IS THE FIX ==================
+          // The previous code had a syntax error here. This is the correct way.
           <ProjectCard 
             title={project.title}
             description={project.description}
             imageUrl={project.image_url}
             techStack={project.tech_stack || []}
             results={project.results}
-            projectUrl={project.project_url} <!-- Pass the new prop -->
+            projectUrl={project.project_url}
           />
+          // ======================================================
         ))}
       </div>
     ) : (
