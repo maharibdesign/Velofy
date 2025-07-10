@@ -5,21 +5,57 @@ import { supabase } from '../lib/supabase';
 
 let featuredProjects = [];
 try {
-  const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false }).limit(3);
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(3);
+
   if (error) { throw error; }
   featuredProjects = data || [];
-} catch (e) { console.error("Homepage - Failed to fetch featured projects:", (e as Error).message); }
+} catch (e) {
+  console.error("Homepage - Failed to fetch featured projects:", (e as Error).message);
+}
 
-const processSteps = [ /* ... content ... */ ];
+// This was a placeholder before, now it's fully defined.
+const processSteps = [
+    { name: "Discover & Strategize", description: "We dive deep into your goals to create a winning strategy for your Telegram presence." },
+    { name: "Design & Develop", description: "Our team designs a beautiful, intuitive UI and builds a robust, scalable Mini App or bot." },
+    { name: "Launch & Grow", description: "We handle the launch and provide ongoing support to ensure your project succeeds and grows." },
+];
 ---
 <Layout title="Home - Expert Telegram Mini App & Bot Development">
-  <!-- Hero and Why Velofy sections ... -->
+  
   <section class="relative bg-gray-900 text-white overflow-hidden">
-    <div class="absolute inset-0 z-0"><img src="https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Abstract background" class="w-full h-full object-cover opacity-20 filter blur-sm"><div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent"></div></div>
-    <div class="relative z-10 container mx-auto px-6 py-32 text-center"><h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-white">Build <span class="text-primary">Faster</span>, Grow <span class="text-primary">Smarter</span></h1><p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">Velofy is a premier agency specializing in high-performance Telegram Mini Apps and automation bots that deliver real business results.</p><a href="/request" class="btn">Start Your Project</a></div>
+    <div class="absolute inset-0 z-0">
+      <img src="https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Abstract background" class="w-full h-full object-cover opacity-20 filter blur-sm">
+      <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent"></div>
+    </div>
+    <div class="relative z-10 container mx-auto px-6 py-32 text-center">
+      <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-white">
+        Build <span class="text-primary">Faster</span>, Grow <span class="text-primary">Smarter</span>
+      </h1>
+      <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+        Velofy is a premier agency specializing in high-performance Telegram Mini Apps and automation bots that deliver real business results.
+      </p>
+      <a href="/request" class="btn">Start Your Project</a>
+    </div>
   </section>
+
   <section class="py-20 bg-white dark:bg-gray-800">
-    <div class="container mx-auto px-6"><div class="text-center mb-12"><h2 class="text-3xl md:text-4xl font-extrabold">Why Velofy?</h2><p class="text-lg text-gray-600 dark:text-gray-300 mt-2 max-w-2xl mx-auto">We don't just build apps. We build revenue-generating engines inside Telegram.</p></div><div class="grid md:grid-cols-3 gap-8 text-center"><div class="p-6"><h3 class="text-2xl font-bold mb-2">Telegram-Native Experts</h3><p class="text-gray-600 dark:text-gray-300">Our solutions are optimized for Telegram's unique platform capabilities, ensuring a seamless user experience.</p></div><div class="p-6"><h3 class="text-2xl font-bold mb-2">Focus on ROI</h3><p class="text-gray-600 dark:text-gray-300">We focus on creating apps that increase engagement, drive sales, and boost your bottom line.</p></div><div class="p-6"><h3 class="text-2xl font-bold mb-2">Full-Service Partnership</h3><p class="text-gray-600 dark:text-gray-300">From strategy and design to launch and support, we're your dedicated partner for long-term success.</p></div></div></div>
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-extrabold">Why Velofy?</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-300 mt-2 max-w-2xl mx-auto">
+            We don't just build apps. We build revenue-generating engines inside Telegram.
+        </p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8 text-center">
+        <div class="p-6"><h3 class="text-2xl font-bold mb-2">Telegram-Native Experts</h3><p class="text-gray-600 dark:text-gray-300">Our solutions are optimized for Telegram's unique platform capabilities, ensuring a seamless user experience.</p></div>
+        <div class="p-6"><h3 class="text-2xl font-bold mb-2">Focus on ROI</h3><p class="text-gray-600 dark:text-gray-300">We focus on creating apps that increase engagement, drive sales, and boost your bottom line.</p></div>
+        <div class="p-6"><h3 class="text-2xl font-bold mb-2">Full-Service Partnership</h3><p class="text-gray-600 dark:text-gray-300">From strategy and design to launch and support, we're your dedicated partner for long-term success.</p></div>
+      </div>
+    </div>
   </section>
 
   {featuredProjects.length > 0 && (
@@ -29,18 +65,23 @@ const processSteps = [ /* ... content ... */ ];
           <h2 class="text-3xl md:text-4xl font-extrabold">Our Recent Work</h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">A glimpse into the quality and impact of our solutions.</p>
         </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {featuredProjects.map(project => (
+                // ================== THIS IS THE FIX ==================
+                // The invalid comment has been removed from this block.
                 <ProjectCard
                     title={project.title}
                     description={project.description}
                     imageUrl={project.image_url}  
                     techStack={project.tech_stack}
                     results={project.results}
-                    projectUrl={project.project_url} <!-- Pass the new prop -->
+                    projectUrl={project.project_url}
                 />
+                // ======================================================
             ))}
         </div>
+        
         <div class="text-center mt-12">
             <a href="/work" class="btn btn-secondary">View All Case Studies</a>
         </div>
@@ -48,8 +89,23 @@ const processSteps = [ /* ... content ... */ ];
     </section>
   )}
 
-  <!-- Our Process Section ... -->
   <section class="py-20 bg-white dark:bg-gray-800">
-    <div class="container mx-auto px-6"><div class="text-center mb-12"><h2 class="text-3xl md:text-4xl font-extrabold">Our Proven Process</h2><p class="text-lg text-gray-600 dark:text-gray-300 mt-2">Simplicity, transparency, and results at every step.</p></div><div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 text-center">{processSteps.map((step,index)=><div class="card p-6"><div class="flex items-center justify-center mb-4"><span class="flex items-center justify-center w-12 h-12 bg-primary/10 text-primary font-bold text-xl rounded-full">{index+1}</span></div><h3 class="text-xl font-bold mb-2">{step.name}</h3><p class="text-gray-600 dark:text-gray-300">{step.description}</p></div>)}</div></div>
+      <div class="container mx-auto px-6">
+          <div class="text-center mb-12">
+              <h2 class="text-3xl md:text-4xl font-extrabold">Our Proven Process</h2>
+              <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">Simplicity, transparency, and results at every step.</p>
+          </div>
+          <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              {processSteps.map((step, index) => (
+                  <div class="card p-6">
+                      <div class="flex items-center justify-center mb-4">
+                          <span class="flex items-center justify-center w-12 h-12 bg-primary/10 text-primary font-bold text-xl rounded-full">{index + 1}</span>
+                      </div>
+                      <h3 class="text-xl font-bold mb-2">{step.name}</h3>
+                      <p class="text-gray-600 dark:text-gray-300">{step.description}</p>
+                  </div>
+              ))}
+          </div>
+      </div>
   </section>
 </Layout>
