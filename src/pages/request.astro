@@ -12,50 +12,23 @@ import Layout from '../layouts/Layout.astro';
     <div id="request-wrapper" class="card p-8">
       <form id="request-form">
         <div class="space-y-6">
-          <div>
-            <label for="full_name" class="block mb-2 font-medium">Full Name</label>
-            <input type="text" id="full_name" name="full_name" class="input-field" required>
-          </div>
-          <div>
-            <label for="telegram_handle" class="block mb-2 font-medium">Telegram Handle (e.g., @username)</label>
-            <input type="text" id="telegram_handle" name="telegram_handle" class="input-field" required>
-          </div>
-
-          <!-- ================== CHANGE #1: BUSINESS TYPE DROPDOWN ================== -->
+          <div><label for="full_name" class="block mb-2 font-medium">Full Name</label><input type="text" id="full_name" name="full_name" class="input-field" required></div>
+          <div><label for="telegram_handle" class="block mb-2 font-medium">Telegram Handle (e.g., @username)</label><input type="text" id="telegram_handle" name="telegram_handle" class="input-field" required></div>
           <div>
             <label for="business_type" class="block mb-2 font-medium">Channel/Business Type</label>
             <select id="business_type" name="business_type" class="input-field" required>
               <option value="" disabled selected>Select a type...</option>
-              <option>E-commerce / Store</option>
-              <option>Community / Social Platform</option>
-              <option>Content & Media</option>
-              <option>Business Tool / SaaS</option>
-              <option>Gaming & Entertainment</option>
-              <option>Other</option>
+              <option>E-commerce / Store</option><option>Community / Social Platform</option><option>Content & Media</option><option>Business Tool / SaaS</option><option>Gaming & Entertainment</option><option>Other</option>
             </select>
           </div>
-          <!-- ====================================================================== -->
-          
-          <!-- ================== CHANGE #2: UPDATED BUDGET RANGE =================== -->
           <div>
             <label for="budget" class="block mb-2 font-medium">Budget Range</label>
             <select id="budget" name="budget" class="input-field" required>
-              <option>0 - 5,000 Birr</option>
-              <option>5,000 - 7,500 Birr</option>
-              <option>7,500 - 10,000 Birr</option>
-              <option>10,000+ Birr</option>
+              <option>0 - 5,000 Birr</option><option>5,000 - 7,500 Birr</option><option>7,500 - 10,000 Birr</option><option>10,000+ Birr</option>
             </select>
           </div>
-          <!-- ====================================================================== -->
-          
-          <div>
-            <label for="message" class="block mb-2 font-medium">Tell us about your project</label>
-            <textarea id="message" name="message" rows="5" class="input-field" required></textarea>
-          </div>
-          <div>
-            <button type="submit" id="submit-btn" class="btn w-full">Submit Request</button>
-            <p id="form-status" class="text-center mt-4 h-5"></p>
-          </div>
+          <div><label for="message" class="block mb-2 font-medium">Tell us about your project</label><textarea id="message" name="message" rows="5" class="input-field" required></textarea></div>
+          <div><button type="submit" id="submit-btn" class="btn w-full">Submit Request</button><p id="form-status" class="text-center mt-4 h-5"></p></div>
         </div>
       </form>
     </div>
@@ -63,8 +36,8 @@ import Layout from '../layouts/Layout.astro';
     <div id="confirmation-message" class="hidden text-center card p-8">
         <h2 class="text-3xl font-bold text-primary mb-4">Thank You!</h2>
         <p class="text-lg mb-6">Your request has been received. We'll be in touch via Telegram shortly.</p>
-        <a href="https://t.me/telegram" target="_blank" class="btn">
-            Open Telegram
+        <a href="https://t.me/velofyminiapps" target="_blank" class="btn">
+            Join Our Channel
         </a>
     </div>
 
@@ -73,30 +46,6 @@ import Layout from '../layouts/Layout.astro';
 
 <script>
     import { supabase } from '../lib/supabase';
-    
-    const form = document.getElementById('request-form') as HTMLFormElement;
-    const statusEl = document.getElementById('form-status');
-    const submitBtn = document.getElementById('submit-btn');
-    const formWrapper = document.getElementById('request-wrapper');
-    const confirmationMsg = document.getElementById('confirmation-message');
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        submitBtn.setAttribute('disabled', 'true');
-        statusEl.textContent = 'Submitting...';
-
-        const formData = new FormData(form);
-        const requestData = Object.fromEntries(formData.entries());
-        
-        const { error } = await supabase.from('requests').insert([requestData]);
-
-        if (error) {
-            statusEl.textContent = `Error: ${error.message}`;
-            if (statusEl) statusEl.classList.add('text-red-500');
-            submitBtn.removeAttribute('disabled');
-        } else {
-            formWrapper.classList.add('hidden');
-            confirmationMsg.classList.remove('hidden');
-        }
-    });
+    const form=document.getElementById('request-form'),statusEl=document.getElementById('form-status'),submitBtn=document.getElementById('submit-btn'),formWrapper=document.getElementById('request-wrapper'),confirmationMsg=document.getElementById('confirmation-message');
+    form.addEventListener('submit',async e=>{e.preventDefault();submitBtn.setAttribute('disabled','true');statusEl.textContent='Submitting...';const formData=new FormData(form),requestData=Object.fromEntries(formData.entries());const{error}=await supabase.from('requests').insert([requestData]);if(error){statusEl.textContent=`Error: ${error.message}`;if(statusEl)statusEl.classList.add('text-red-500');submitBtn.removeAttribute('disabled')}else{formWrapper.classList.add('hidden');confirmationMsg.classList.remove('hidden')}});
 </script>
