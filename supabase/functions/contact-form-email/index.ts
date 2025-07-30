@@ -1,19 +1,18 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { Resend } from 'npm:resend'
 
-// These will be loaded from the secrets you set in the next step
+// These will be loaded from the secrets you set
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const NOTIFICATION_EMAIL = Deno.env.get('NOTIFICATION_EMAIL')
 
 serve(async (req) => {
-  // The Supabase webhook will send a POST request
   if (req.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 })
   }
   
   try {
     const payload = await req.json()
-    const record = payload.record // This is the new row from your 'requests' table
+    const record = payload.record
 
     if (!RESEND_API_KEY || !NOTIFICATION_EMAIL) {
         console.error('Missing RESEND_API_KEY or NOTIFICATION_EMAIL env vars');
@@ -22,7 +21,6 @@ serve(async (req) => {
     
     const resend = new Resend(RESEND_API_KEY)
     
-    // Clean up the Telegram handle to be used in the link
     const telegramHandle = (record.telegram_handle || '').replace('@', '');
 
     const subject = `🚀 New Lead from Velofy: ${record.full_name}`
@@ -40,9 +38,12 @@ serve(async (req) => {
       <p style="white-space: pre-wrap;">${record.message}</p>
     `
 
-    // Send the email
     await resend.emails.send({
-      from: 'velofy.com', // IMPORTANT: Replace with your verified domain from Resend
+      // ================== THIS IS THE FIX ==================
+      // Using a valid email format with your verified domain.
+      from: 'leads@velofy.com',
+      // ======================================================
+
       to: NOTIFICATION_EMAIL,
       subject: subject,
       html: emailHtml,
