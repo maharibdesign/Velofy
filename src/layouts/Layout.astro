@@ -25,13 +25,13 @@ const { title, description = "Velofy: Your expert partner for building powerful 
     <meta name="generator" content={Astro.generator} />
     <title>{title} | Velofy Agency</title>
 
-    <!-- Telegram Web App Scripts -->
+    <!-- The core Telegram script is still needed -->
     <script is:inline src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- ================== NEW: TELEGRAM ANALYTICS SDK ================== -->
-    <!-- Load the SDK script asynchronously from the CDN -->
-    <script is:inline defer src="https://telegram.org/js/telegram-analytics.js"></script>
-    <!-- ================================================================= -->
+    <!-- ================== THIS IS THE CHANGE ================== -->
+    <!-- The analytics script tag has been REMOVED from the <head> -->
+    <!-- It will now be loaded dynamically by our twa-analytics.ts script -->
+    <!-- ========================================================= -->
   </head>
   <body>
     <AnnouncementBanner />
@@ -41,18 +41,14 @@ const { title, description = "Velofy: Your expert partner for building powerful 
     </main>
     <Footer />
 
-    <!-- ================== NEW: TRACKING SCRIPT ================== -->
     <script>
       import { trackTwaAnalytics } from '../lib/twa-analytics.ts';
 
-      // This function will run on every page that uses this layout
+      // Run on initial page load
       trackTwaAnalytics();
 
-      // Astro's View Transitions are like a client-side SPA.
-      // We need to track page views after a navigation occurs.
+      // Run after every page transition (for Astro View Transitions)
       document.addEventListener('astro:after-swap', trackTwaAnalytics);
     </script>
-    <!-- ========================================================= -->
-
   </body>
 </html>
