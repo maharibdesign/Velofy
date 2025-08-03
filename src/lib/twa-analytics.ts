@@ -10,53 +10,27 @@ declare global {
 }
 
 let isTwaAnalyticsInitialized = false;
-let isSdkLoading = false;
-
-// NEW: Function to dynamically load the SDK script
-function loadTwaSdk(callback: () => void) {
-  if (window.TelegramAnalytics) {
-    return callback();
-  }
-
-  if (isSdkLoading) {
-    // If it's already loading, just wait for it to finish
-    document.addEventListener('twa-sdk-loaded', callback);
-    return;
-  }
-  
-  isSdkLoading = true;
-  const script = document.createElement('script');
-  script.src = 'https://telegram.org/js/telegram-analytics.js';
-  script.async = true;
-  
-  script.onload = () => {
-    console.log('%c[Analytics]', 'color: #007aff;', 'Telegram Analytics SDK Loaded.');
-    isSdkLoading = false;
-    // Notify any waiting functions that the SDK is ready
-    document.dispatchEvent(new Event('twa-sdk-loaded'));
-    callback();
-  };
-  
-  script.onerror = () => {
-    console.error('Failed to load Telegram Analytics SDK.');
-    isSdkLoading = false;
-  };
-  
-  document.head.appendChild(script);
-}
-
 
 export function trackTwaAnalytics() {
+  // Don't run on the server
   if (typeof window === 'undefined') return;
 
-  loadTwaSdk(() => {
+  // The SDK script is now inlined in Layout.astro, so window.TelegramAnalytics should exist.
+  // We'll add a small delay to make sure the inlined script has been parsed by the browser.
+  setTimeout(() => {
     const apiKey = import.meta.env.PUBLIC_TELEGRAM_ANALYTICS_KEY;
     
     if (!apiKey) {
+      return; // Silently fail if no key is set
+    }
+
+    // Check if the SDK is available on the window object
+    if (!window.TelegramAnalytics) {
+      console.error('Telegram Analytics SDK not found on window object. Initialization failed.');
       return;
     }
 
-    if (!isTwaAnalyticsInitialized && window.TelegramAnalytics) {
+    if (!isTwaAnalyticsInitialized) {
       try {
         window.TelegramAnalytics.init({
           apiKey: apiKey,
@@ -80,5 +54,5 @@ export function trackTwaAnalytics() {
         console.error('Failed to send pageview to Telegram Analytics:', error);
       }
     }
-  });
+  }, 0); // setTimeout with 0ms delay waits for the current execution stack to clear
 }
