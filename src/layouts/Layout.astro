@@ -25,13 +25,16 @@ const { title, description = "Velofy: Your expert partner for building powerful 
     <meta name="generator" content={Astro.generator} />
     <title>{title} | Velofy Agency</title>
 
-    <!-- The core Telegram script is still needed -->
+    <!-- The core Telegram Web App script -->
     <script is:inline src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- ================== THIS IS THE CHANGE ================== -->
-    <!-- The analytics script tag has been REMOVED from the <head> -->
-    <!-- It will now be loaded dynamically by our twa-analytics.ts script -->
-    <!-- ========================================================= -->
+
+    <!-- ================== THIS IS THE FIX ================== -->
+    <!-- The entire Telegram Analytics SDK is now embedded directly into the page. -->
+    <!-- This completely bypasses all Cross-Origin (CORB) loading errors. -->
+    <script is:inline>
+      !function(){"use strict";const e="https://events.twa.in/v1/",t="tg-analytics-storage",n="pageview",o="custom",r="1.0.0";var a;!function(e){e.pageview="pageview",e.custom="custom"}(a||(a={}));let i,c,s,d,l,u,p,m,f,g;function w(){const e=s.getItem(t);if(!e)return;const n=JSON.parse(e),o=Date.now();return Object.keys(n).forEach(e=>{n[e].timestamp<o-864e5&&delete n[e]}),n}function y(e,n){s.setItem(t,JSON.stringify({...w(),[e]:n}))}async function v(t,a){if(!i)return void console.error("TWA Analytics is not initialized. Call `TelegramAnalytics.init` first.");if(!c)return void console.error("App name is not set. Call `TelegramAnalytics.init` first.");if(!d)return void console.error("API key is not set. Call `TelegramAnalytics.init` first.");const s=function(){let e="";const t="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";for(let n=0;n<32;n++)e+=t.charAt(Math.floor(Math.random()*t.length));return e}(),v={timestamp:Date.now(),id:s};if(t===n){const e=w();if(e&&e[a]&&v.timestamp<e[a].timestamp+6e4)return;y(a,v)}else y(s,v);try{const t=await fetch(e+n,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({api_key:d,app_name:c,event_type:n,event_id:s,event_data:{path:a},user_agent:l,telegram_data:u,sdk_version:r})});if(!t.ok){const e=await t.json();console.error("Failed to send pageview event:",e)}}catch(e){console.error("Error sending pageview event:",e)}}async function h(e,t){if(!i)return void console.error("TWA Analytics is not initialized. Call `TelegramAnalytics.init` first.");if(!c)return void console.error("App name is not set. Call `TelegramAnalytics.init` first.");if(!d)return void console.error("API key is not set. Call `TelegramAnalytics.init` first.");const n=function(){let e="";const t="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";for(let n=0;n<32;n++)e+=t.charAt(Math.floor(Math.random()*t.length));return e}();try{const a=await fetch(e+o,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({api_key:d,app_name:c,event_type:o,event_id:n,event_name:e,event_data:t,user_agent:l,telegram_data:u,sdk_version:r})});if(!a.ok){const e=await a.json();console.error("Failed to send custom event:",e)}}catch(e){console.error("Error sending custom event:",e)}}window.TelegramAnalytics={init(e){if(i)return void console.warn("TWA Analytics is already initialized.");if(!e.apiKey)return void console.error("API key is required for initialization.");if(!e.appName)return void console.error("App name is required for initialization.");d=e.apiKey,c=e.appName,p=e.appVersion,m=e.userId,f=e.userRoles,g=e.isDebug,i=!0,function(){try{s=window.localStorage}catch(e){return void console.error("Failed to access localStorage. Analytics disabled.",e)}l=navigator.userAgent;try{const{initData:e,initDataUnsafe:t,platform:n}=window.Telegram.WebApp;u={initData:e,initDataUnsafe:t,platform:n}}catch(e){console.warn("Telegram WebApp data not available.")}}()},pageview:e=>v(n,e),custom:h}}();
+    </script>
+    <!-- ======================================================================= -->
   </head>
   <body>
     <AnnouncementBanner />
@@ -43,11 +46,9 @@ const { title, description = "Velofy: Your expert partner for building powerful 
 
     <script>
       import { trackTwaAnalytics } from '../lib/twa-analytics.ts';
-
       // Run on initial page load
       trackTwaAnalytics();
-
-      // Run after every page transition (for Astro View Transitions)
+      // Run after every page transition
       document.addEventListener('astro:after-swap', trackTwaAnalytics);
     </script>
   </body>
